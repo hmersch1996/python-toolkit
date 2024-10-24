@@ -41,6 +41,17 @@ COLOR_MASKS = {
 # Cache para códigos QR generados
 qr_cache = {}
 
+def hex_to_rgb(value):
+    value = value.lstrip('#')
+    lv = len(value)
+    if lv == 6:
+        return tuple(int(value[i:i+2], 16) for i in (0, 2, 4))
+    elif lv == 3:
+        return tuple(int(value[i]*2, 16) for i in range(3))
+    else:
+        raise ValueError("Formato de color hexadecimal inválido")
+
+
 def generate_qr_image(form_data, files_data=None, include_embedded_image=False):
     data = form_data.get('data')
     if not data:
@@ -71,7 +82,10 @@ def generate_qr_image(form_data, files_data=None, include_embedded_image=False):
         module_drawer_name = form_data.get('module_drawer', 'square')
         module_drawer = MODULE_DRAWERS.get(module_drawer_name, SquareModuleDrawer())
         color_mask_name = form_data.get('color_mask', 'solid')
-        color_mask = COLOR_MASKS.get(color_mask_name, SolidFillColorMask())
+
+        # Convertir colores hexadecimales a RGB
+        fill_color_rgb = hex_to_rgb(fill_color)
+        back_color_rgb = hex_to_rgb(back_color)
 
         qr = qrcode.QRCode(
             version=version,
@@ -89,16 +103,29 @@ def generate_qr_image(form_data, files_data=None, include_embedded_image=False):
                 embedded_image = Image.open(embedded_image)
                 embedded_image = embedded_image.convert("RGBA")
                 max_size = (qr.modules_count * box_size // 3, qr.modules_count * box_size // 3)
-                embedded_image.thumbnail(max_size)
+                embedded_image.thumbnail((int(max_size[0]), int(max_size[1])))
                 embedded_image_path = embedded_image
+
+        # Configuración de colores para la máscara de color
+        if color_mask_name == 'solid':
+            color_mask = SolidFillColorMask(front_color=fill_color_rgb, back_color=back_color_rgb)
+        elif color_mask_name == 'gradient':
+            color_mask = RadialGradiantColorMask(center_color=fill_color_rgb, edge_color=back_color_rgb)
+        elif color_mask_name == 'square_gradient':
+            color_mask = SquareGradiantColorMask(center_color=fill_color_rgb, edge_color=back_color_rgb)
+        elif color_mask_name == 'horizontal_gradient':
+            color_mask = HorizontalGradiantColorMask(left_color=fill_color_rgb, right_color=back_color_rgb)
+        elif color_mask_name == 'vertical_gradient':
+            color_mask = VerticalGradiantColorMask(top_color=fill_color_rgb, bottom_color=back_color_rgb)
+        else:
+            # Si la máscara de color no es reconocida, usar 'solid' por defecto
+            color_mask = SolidFillColorMask(front_color=fill_color_rgb, back_color=back_color_rgb)
 
         img = qr.make_image(
             image_factory=StyledPilImage,
             module_drawer=module_drawer,
             color_mask=color_mask,
-            embeded_image=embedded_image_path,
-            fill_color=fill_color,
-            back_color=back_color
+            embeded_image=embedded_image_path
         ).convert('RGB')
 
         buffer = io.BytesIO()
@@ -115,6 +142,7 @@ def generate_qr_image(form_data, files_data=None, include_embedded_image=False):
     except Exception as e:
         return None, str(e)
 
+
 @app.route('/')
 def index():
     return redirect(url_for('qr_generator'))
@@ -129,12 +157,13 @@ def qr_generator():
 
 @app.route('/generate-qr', methods=['POST'])
 def generate_qr():
-    include_embedded_image = False
+    include_embedded_image = True  # Asegurarse de que está en True
     qr_image, error = generate_qr_image(request.form, request.files, include_embedded_image=include_embedded_image)
     if qr_image:
         return jsonify({'qr_image': qr_image})
     else:
         return jsonify({'error': error}), 500
+
 
 @app.route('/download-qr', methods=['POST'])
 def download_qr():

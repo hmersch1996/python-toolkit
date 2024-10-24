@@ -4,7 +4,7 @@
 <h1>Generador de Códigos QR</h1>
 <div class="container">
     <div class="form-container">
-        <form id="qr-form">
+        <form id="qr-form" enctype="multipart/form-data">
             <label for="data" title="Link que deseas que sea un QR">Texto o URL:</label><br>
             <input type="text" id="data" name="data" required><br><br>
 
@@ -17,7 +17,9 @@
                 <option value="M" selected>M - Media (15%)</option>
                 <option value="Q">Q - Alta (25%)</option>
                 <option value="H">H - Máxima (30%)</option>
-            </select><br><br>
+            </select><br>
+            <span id="error-correction-info" style="color: red;"></span>
+            <br><br>
 
             <label for="box_size" title="El tamaño físico del QR.">Tamaño de Caja:</label><br>
             <input type="number" id="box_size" name="box_size" value="10"><br><br>
@@ -29,14 +31,18 @@
             <input type="color" id="fill_color" name="fill_color" value="#000000"><br><br>
 
             <label for="back_color" title="Es el color del fondo del módulo.">Color de Fondo:</label><br>
-            <input type="color" id="back_color" name="back_color" value="#FFFFFF"><br><br>
+            <input type="color" id="back_color" name="back_color" value="#FFFFFF"><br>
+            <span id="contrast-info" style="color: red;"></span>
+            <br><br>
 
             <label for="module_drawer" title="Te permite visualizar diferentes estilos de QR.">Estilo de Módulo:</label><br>
             <select id="module_drawer" name="module_drawer">
                 {% for drawer in module_drawers %}
                 <option value="{{ drawer }}">{{ drawer.replace('_', ' ').title() }}</option>
                 {% endfor %}
-            </select><br><br>
+            </select><br>
+            <span id="module-style-info" style="color: red;"></span>
+            <br><br>
 
             <label for="color_mask" title="Permite incluir patrones complejos de color en el QR.">Máscara de Color:</label><br>
             <select id="color_mask" name="color_mask">
