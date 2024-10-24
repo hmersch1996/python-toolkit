@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Aplicación Utilitaria</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <a href="{{ url_for('qr_generator') }}">QR Generator</a> |
+            <a href="{{ url_for('coming_so
+
+on') }}">Coming Soon</a>
+        </div>
+        <div class="nav-right">
+            <label class="switch">
+                <input type="checkbox" id="dark-mode-toggle">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </nav>
+    <hr>
+    {% block content %}{% endblock %}
+    <div id="loading-indicator" class="loading-indicator">
+        Generando código QR...
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='dark_mode.js') }}"></script>
+    <script src="{{ url_for('static', filename='loader.js') }}"></script>
+</body>
+</html>

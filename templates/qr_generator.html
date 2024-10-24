@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Generador de Códigos QR</h1>
+<div class="container">
+    <div class="form-container">
+        <form id="qr-form">
+            <label for="data" title="Link que deseas que sea un QR">Texto o URL:</label><br>
+            <input type="text" id="data" name="data" required><br><br>
+
+            <label for="version" title="El tamaño del QR. La versión 1 tiene 21 módulos por lado (21x21). El tamaño aumenta 4 módulos por versión hasta la versión 40 (177x177 módulos).">Versión:</label><br>
+            <input type="number" id="version" name="version" min="1" max="40"><br><br>
+
+            <label for="error_correction" title="Indica la cantidad de 'basura' o módulos no legibles permitidos en la imagen. Para mayor resistencia al daño, selecciona H.">Corrección de Error:</label><br>
+            <select id="error_correction" name="error_correction">
+                <option value="L">L - Baja (7%)</option>
+                <option value="M" selected>M - Media (15%)</option>
+                <option value="Q">Q - Alta (25%)</option>
+                <option value="H">H - Máxima (30%)</option>
+            </select><br><br>
+
+            <label for="box_size" title="El tamaño físico del QR.">Tamaño de Caja:</label><br>
+            <input type="number" id="box_size" name="box_size" value="10"><br><br>
+
+            <label for="border" title="Indica el tamaño físico del QR indicando cuántos píxeles tiene cada caja o módulo.">Borde:</label><br>
+            <input type="number" id="border" name="border" value="4"><br><br>
+
+            <label for="fill_color" title="Es el color del módulo.">Color de Relleno:</label><br>
+            <input type="color" id="fill_color" name="fill_color" value="#000000"><br><br>
+
+            <label for="back_color" title="Es el color del fondo del módulo.">Color de Fondo:</label><br>
+            <input type="color" id="back_color" name="back_color" value="#FFFFFF"><br><br>
+
+            <label for="module_drawer" title="Te permite visualizar diferentes estilos de QR.">Estilo de Módulo:</label><br>
+            <select id="module_drawer" name="module_drawer">
+                {% for drawer in module_drawers %}
+                <option value="{{ drawer }}">{{ drawer.replace('_', ' ').title() }}</option>
+                {% endfor %}
+            </select><br><br>
+
+            <label for="color_mask" title="Permite incluir patrones complejos de color en el QR.">Máscara de Color:</label><br>
+            <select id="color_mask" name="color_mask">
+                {% for mask in color_masks %}
+                <option value="{{ mask }}">{{ mask.replace('_', ' ').title() }}</option>
+                {% endfor %}
+            </select><br><br>
+
+            <label for="embedded_image" title="Te permite incrustar una imagen dentro del QR, por ejemplo, un logo.">Imagen Incrustada (opcional):</label><br>
+            <input type="file" id="embedded_image" name="embedded_image" accept="image/*"><br><br>
+
+            <input type="submit" value="Descargar QR">
+        </form>
+    </div>
+    <div class="preview-container">
+        <h2>Previsualización:</h2>
+        <div id="qr-preview">
+            <!-- La imagen del QR se actualizará aquí -->
+        </div>
+    </div>
+</div>
+{% endblock %}
